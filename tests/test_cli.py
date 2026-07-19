@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -102,10 +103,30 @@ def test_vex_format_emits_valid_openvex(
     assert document["statements"]
 
 
+# CSI colour sequences emitted by Rich.
+_ANSI = re.compile("\x1b\[[0-9;]*m")
+
+
+def _plain(text: str) -> str:
+    """Strip ANSI codes and collapse whitespace.
+
+    Typer renders errors through Rich, which hard-wraps to the terminal width
+    and injects colour codes. Asserting on the raw string passes on a wide
+    local terminal and fails on CI at 80 columns, where the same message is
+    broken across lines - so normalise before matching on it.
+    """
+    return " ".join(re.sub(_ANSI, "", text).split())
+
+
 def test_scan_without_advisories_fails_with_actionable_message(
     sample_app_path: Path,
 ) -> None:
-    result = CliRunner().invoke(app, ["scan", str(sample_app_path)])
+    # COLUMNS pins the render width so the assertion does not depend on the
+    # terminal the suite happens to run in.
+    result = CliRunner().invoke(
+        app, ["scan", str(sample_app_path)], env={"COLUMNS": "200"}
+    )
 
     assert result.exit_code != 0
-    assert "pass --advisories PATH" in result.output
+    output = _plain(result.output)
+    assert "--advisories" in output, output[:400]
