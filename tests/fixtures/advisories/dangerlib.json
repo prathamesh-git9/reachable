@@ -1,0 +1,40 @@
+{
+  "id": "OSV-2026-0001",
+  "aliases": ["CVE-2026-10001"],
+  "summary": "dangerlib dangerous_call permits unsafe input handling",
+  "details": "The dangerous_call function mishandles attacker-controlled input.",
+  "severity": [
+    {
+      "type": "CVSS_V3",
+      "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+    }
+  ],
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "dangerlib"
+      },
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {"introduced": "0"},
+            {"fixed": "1.1.0"}
+          ]
+        }
+      ],
+      "database_specific": {
+        "vulnerable_symbols": ["dangerlib.vuln.dangerous_call"]
+      }
+    }
+  ],
+  "published": "2026-01-10T00:00:00Z",
+  "modified": "2026-01-12T00:00:00Z",
+  "references": [
+    {
+      "type": "ADVISORY",
+      "url": "https://example.com/advisories/dangerlib"
+    }
+  ]
+}

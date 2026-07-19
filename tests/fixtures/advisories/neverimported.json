@@ -1,0 +1,37 @@
+{
+  "id": "OSV-2026-0004",
+  "aliases": ["CVE-2026-10004"],
+  "summary": "neverimported advisory without symbol metadata",
+  "details": "This fixture intentionally omits vulnerable_symbols.",
+  "severity": [
+    {
+      "type": "CVSS_V3",
+      "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N"
+    }
+  ],
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "neverimported"
+      },
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {"introduced": "0"},
+            {"fixed": "4.0.0"}
+          ]
+        }
+      ]
+    }
+  ],
+  "published": "2026-04-01T00:00:00Z",
+  "modified": "2026-04-01T00:00:00Z",
+  "references": [
+    {
+      "type": "WEB",
+      "url": "https://example.com/advisories/neverimported"
+    }
+  ]
+}

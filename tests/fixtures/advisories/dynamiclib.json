@@ -1,0 +1,40 @@
+{
+  "id": "OSV-2026-0003",
+  "aliases": ["CVE-2026-10003"],
+  "summary": "dynamiclib dynamic handler vulnerability",
+  "details": "A handler in dynamiclib can be exploited when dynamically invoked.",
+  "severity": [
+    {
+      "type": "CVSS_V3",
+      "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N"
+    }
+  ],
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "PyPI",
+        "name": "dynamiclib"
+      },
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {"introduced": "0"},
+            {"fixed": "1.0.0"}
+          ]
+        }
+      ],
+      "database_specific": {
+        "vulnerable_symbols": ["dynamiclib.handlers.handle_run"]
+      }
+    }
+  ],
+  "published": "2026-03-01T00:00:00Z",
+  "modified": "2026-03-03T00:00:00Z",
+  "references": [
+    {
+      "type": "ADVISORY",
+      "url": "https://example.com/advisories/dynamiclib"
+    }
+  ]
+}
