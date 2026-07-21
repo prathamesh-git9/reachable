@@ -255,6 +255,9 @@ def _relevant_dynamic_sites(
     call_graph: CallGraph,
     dependency: Dependency,
 ) -> list[DynamicSite]:
+    # Dynamic dispatch only blocks a NOT_REACHABLE claim when it appears in a
+    # module that imports the dependency. This keeps unrelated plugin or lookup
+    # machinery from turning every imported package into UNKNOWN.
     imported_modules = {
         module
         for module, imports in call_graph.imports.items()

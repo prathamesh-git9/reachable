@@ -210,6 +210,9 @@ class Analyzer(ast.NodeVisitor):
 
     def _record_dynamic_call(self, node: ast.Call) -> None:
         name = self._resolve_expr(node.func)
+        # These sites are recorded as uncertainty, not edges. Static AST can
+        # name the risky construct but cannot safely infer the runtime target
+        # without executing or evaluating attacker-controlled project code.
         computed_getattr = (
             name == "getattr"
             and len(node.args) >= 2
