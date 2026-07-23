@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from reachable.advisories import AdvisoryDatabase, load_osv
 from reachable.providers.base import ChatProvider
+from reachable.sarif import to_sarif
 from reachable.scan import Scanner, to_jsonable
 
 
@@ -76,5 +77,14 @@ def create_app(
             product_id=request.product_id,
         )
         return to_jsonable(result.openvex)
+
+    @app.post("/sarif")
+    def emit_sarif(request: ScanRequest) -> dict[str, Any]:
+        scanner = Scanner(advisory_db, provider, explain=False)
+        result = scanner.scan(
+            request.project_root,
+            entrypoints=request.entrypoints,
+        )
+        return to_sarif(result.findings)
 
     return app

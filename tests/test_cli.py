@@ -103,6 +103,28 @@ def test_vex_format_emits_valid_openvex(
     assert document["statements"]
 
 
+def test_sarif_format_emits_github_code_scanning_document(
+    sample_app_path: Path,
+    advisory_dir: Path,
+) -> None:
+    result = CliRunner().invoke(
+        app,
+        [
+            "scan",
+            str(sample_app_path),
+            "--advisories",
+            str(advisory_dir),
+            "--format",
+            "sarif",
+        ],
+    )
+
+    assert result.exit_code == 0
+    document = json.loads(result.stdout)
+    assert document["version"] == "2.1.0"
+    assert document["runs"][0]["results"]
+
+
 # CSI colour sequences emitted by Rich.
 _ANSI = re.compile("\x1b\[[0-9;]*m")
 

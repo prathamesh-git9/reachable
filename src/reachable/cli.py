@@ -19,6 +19,7 @@ from reachable.explain import Explainer
 from reachable.providers.fake import FakeProvider
 from reachable.reachability import Finding, Verdict
 from reachable.report import to_markdown, to_table
+from reachable.sarif import to_sarif
 from reachable.scan import Scanner, to_jsonable
 
 app = typer.Typer(help="CVE reachability triage for Python projects.")
@@ -35,7 +36,7 @@ def scan(
     output_format: str = typer.Option(
         "table",
         "--format",
-        help="Output format: table, json, markdown, or vex.",
+        help="Output format: table, json, markdown, vex, or sarif.",
     ),
     entrypoint: list[str] = typer.Option(
         [],
@@ -121,9 +122,11 @@ def _format_result(result: Any, output_format: str) -> str:
         return to_markdown(result.findings)
     if output_format == "vex":
         return json.dumps(to_jsonable(result.openvex), indent=2)
+    if output_format == "sarif":
+        return json.dumps(to_sarif(result.findings), indent=2)
     if output_format == "table":
         return _table(result.findings)
-    raise typer.BadParameter("format must be table, json, markdown, or vex")
+    raise typer.BadParameter("format must be table, json, markdown, vex, or sarif")
 
 
 def _table(findings: list[Finding]) -> str:

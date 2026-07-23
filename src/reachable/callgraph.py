@@ -27,6 +27,13 @@ class DynamicSite:
     snippet: str
 
 
+@dataclass(frozen=True)
+class SourceLocation:
+    path: str
+    line: int
+    symbol: str
+
+
 @dataclass
 class CallGraph:
     edges: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
@@ -34,9 +41,17 @@ class CallGraph:
     dynamic_sites: list[DynamicSite] = field(default_factory=list)
     unparsed_files: list[str] = field(default_factory=list)
     imports: dict[str, set[str]] = field(default_factory=lambda: defaultdict(set))
+    edge_locations: dict[tuple[str, str], SourceLocation] = field(default_factory=dict)
 
-    def add_edge(self, caller: str, callee: str) -> None:
+    def add_edge(
+        self,
+        caller: str,
+        callee: str,
+        location: SourceLocation | None = None,
+    ) -> None:
         self.edges[caller].add(callee)
+        if location is not None:
+            self.edge_locations.setdefault((caller, callee), location)
 
     def reachable_from(self, roots: Iterable[str]) -> set[str]:
         seen: set[str] = set()
@@ -158,7 +173,15 @@ class Analyzer(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         callee = self._resolve_expr(node.func)
         if callee:
-            self.graph.add_edge(self.current_symbol, callee)
+            self.graph.add_edge(
+                self.current_symbol,
+                callee,
+                SourceLocation(
+                    path=self.file_path.relative_to(self.root).as_posix(),
+                    line=getattr(node, "lineno", 1),
+                    symbol=self.current_symbol,
+                ),
+            )
         self._record_dynamic_call(node)
         self.generic_visit(node)
 

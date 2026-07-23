@@ -2,8 +2,8 @@
 
 `reachable` is a Python CVE reachability triage engine. Given a Python project,
 it checks known vulnerabilities in declared dependencies, determines whether
-the vulnerable symbols are reachable from application entrypoints, and emits an
-OpenVEX document plus a prioritised report.
+the vulnerable symbols are reachable from application entrypoints, and emits
+OpenVEX, SARIF 2.1.0, and a prioritised report.
 
 The problem is volume and precision. More than 48,000 CVEs were published in
 2025, about 59,000 are forecast for 2026, and only about 5.5% are ever exploited
@@ -29,6 +29,11 @@ reachable scan tests/fixtures/sample_app \
 reachable scan tests/fixtures/sample_app \
   --advisories tests/fixtures/advisories \
   --format vex
+
+reachable scan tests/fixtures/sample_app \
+  --advisories tests/fixtures/advisories \
+  --format sarif \
+  --output reachable.sarif
 ```
 
 Run the local demo with no credentials:
@@ -55,7 +60,7 @@ Python AST call graph ---- Vulnerable symbols
         Reachability verdict
                   |
                   v
-      OpenVEX + prioritised report
+  OpenVEX + SARIF + prioritised report
 ```
 
 The scanner reads `requirements*.txt` and `pyproject.toml`, loads OSV-shaped
@@ -98,7 +103,7 @@ importers or unparsed files could hide execution.
 ## CLI Reference
 
 ```text
-reachable scan PATH --advisories PATH [--format table|json|markdown|vex]
+reachable scan PATH --advisories PATH [--format table|json|markdown|vex|sarif]
                     [--entrypoint SYMBOL] [--no-explain]
                     [--fail-on reachable|unknown|never]
                     [--output PATH]
@@ -132,6 +137,7 @@ app = create_app(AdvisoryDatabase())
 | `GET` | `/healthz` | Health check |
 | `POST` | `/scan` | Run a scan for `project_root` |
 | `POST` | `/vex` | Emit OpenVEX for `project_root` |
+| `POST` | `/sarif` | Emit actionable SARIF 2.1.0 results |
 | `GET` | `/advisories` | List loaded advisories |
 | `POST` | `/advisories` | Add one OSV advisory |
 | `GET` | `/advisories/{advisory_id}` | Fetch by id or alias |
@@ -139,14 +145,25 @@ app = create_app(AdvisoryDatabase())
 ## MCP Integration
 
 `reachable.mcp_server.create_mcp_server(advisory_db, provider)` exposes MCP
-tools for scanning, explanation, advisory listing, and OpenVEX emission. The
-MCP package is optional:
+tools for scanning, explanation, advisory listing, OpenVEX, and SARIF emission.
+The MCP package is optional:
 
 ```bash
 pip install -e .[mcp]
 ```
 
 The MCP tools use the same scanner contracts as the CLI and API.
+
+## SARIF / GitHub Code Scanning
+
+SARIF emits only findings that require action: `REACHABLE` becomes an error and
+`UNKNOWN` becomes a warning. Defensible `NOT_REACHABLE` findings remain in JSON,
+reports, and OpenVEX, but do not pollute the code-scanning alert stream.
+
+Each result has a stable fingerprint, an advisory-backed rule, and—when static
+analysis found a path—physical source locations and a code-flow trace. Generate
+`reachable.sarif` in CI, then upload it with GitHub's SARIF upload action. The
+stable fingerprint lets code scanning track the same finding between runs.
 
 ## OpenVEX Output
 

@@ -12,6 +12,7 @@ from typing import Any
 from reachable.advisories import AdvisoryDatabase
 from reachable.explain import Explainer
 from reachable.providers.base import ChatProvider
+from reachable.sarif import to_sarif
 from reachable.scan import Scanner, to_jsonable
 
 
@@ -69,5 +70,12 @@ def create_mcp_server(
             product_id=product_id,
         )
         return to_jsonable(result.openvex)
+
+    @server.tool()
+    def emit_sarif(project_root: str) -> dict[str, Any]:
+        """Emit actionable findings as SARIF 2.1.0 for code scanning."""
+
+        result = Scanner(advisory_db, provider, explain=False).scan(project_root)
+        return to_sarif(result.findings)
 
     return server

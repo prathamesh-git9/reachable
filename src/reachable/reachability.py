@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from reachable.advisories import Advisory, AdvisoryDatabase
-from reachable.callgraph import CallGraph, DynamicSite
+from reachable.callgraph import CallGraph, DynamicSite, SourceLocation
 from reachable.dependencies import Dependency, normalize_name
 
 
@@ -34,6 +34,7 @@ class Finding:
     call_paths: list[list[str]] = field(default_factory=list)
     dynamic_sites_considered: list[DynamicSite] = field(default_factory=list)
     vulnerable_symbols_checked: list[str] = field(default_factory=list)
+    call_path_locations: list[list[SourceLocation]] = field(default_factory=list)
 
 
 def analyse(
@@ -220,6 +221,14 @@ def _finding(
         call_paths=paths,
         dynamic_sites_considered=dynamic_sites,
         vulnerable_symbols_checked=symbols,
+        call_path_locations=[
+            [
+                location
+                for caller, callee in zip(path, path[1:], strict=False)
+                if (location := graph.edge_locations.get((caller, callee))) is not None
+            ]
+            for path in paths
+        ],
     )
 
 
